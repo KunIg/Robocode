@@ -1,6 +1,7 @@
 package IK;
 
 import robocode.AdvancedRobot;
+import robocode.HitRobotEvent;
 import robocode.Rules;
 import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
@@ -30,17 +31,13 @@ public class IK_Bot extends AdvancedRobot {
 		  setTurnRadarRightRadians(radarTurn);
 		  setTurnGunRightRadians(gunTurn);
 	      // Stay at right angles to the opponent
-		  setTurnRight(e.getBearing()+90-
-	         30*movementDirection);
+		  setTurnRight(e.getBearing()+90-30*movementDirection);
 	      
 	     // If the bot has small energy drop, it most likely fired
 	    double changeInEnergy =
 	      previousEnergy-e.getEnergy();
-	    if (changeInEnergy>0 &&
-	        changeInEnergy<=3) {
-	         // Dodge!
-	         movementDirection =
-	          -movementDirection;
+	    if (changeInEnergy>0 && changeInEnergy<=3) {
+	         movementDirection =-movementDirection;
 	         setAhead((e.getDistance()/4+25)*movementDirection);
 	     }
 	    
@@ -50,6 +47,29 @@ public class IK_Bot extends AdvancedRobot {
 	    // Track the energy level
 	    previousEnergy = e.getEnergy();
 	  }
+	  
+		public void onHitRobot(HitRobotEvent e) {
+			
+		      double angleToEnemy = getHeadingRadians() + e.getBearingRadians();
+			  double bodyTurn = Utils.normalRelativeAngle(angleToEnemy - getHeadingRadians());
+
+			turnRight(e.getBearing());
+
+			// Determine a shot that won't kill the robot...
+			// We want to ram him instead for bonus points
+			if (e.getEnergy() > 16) {
+				fire(3);
+			} else if (e.getEnergy() > 10) {
+				fire(2);
+			} else if (e.getEnergy() > 4) {
+				fire(1);
+			} else if (e.getEnergy() > 2) {
+				fire(.5);
+			} else if (e.getEnergy() > .4) {
+				fire(.1);
+			}
+			ahead(40); // Ram him again!
+		}
 
 }
 
