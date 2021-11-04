@@ -21,7 +21,6 @@ public class IK_Bot extends AdvancedRobot {
 	  }
 	  public void onScannedRobot(
 	    ScannedRobotEvent e) {
-	      // Stay at right angles to the opponent
 	      double angleToEnemy = getHeadingRadians() + e.getBearingRadians();
 		  double radarTurn = Utils.normalRelativeAngle(angleToEnemy - getRadarHeadingRadians());
 		  double gunTurn = Utils.normalRelativeAngle(angleToEnemy - getGunHeadingRadians());
@@ -30,11 +29,11 @@ public class IK_Bot extends AdvancedRobot {
 		  
 		  setTurnRadarRightRadians(radarTurn);
 		  setTurnGunRightRadians(gunTurn);
+	      // Stay at right angles to the opponent
 		  setTurnRight(e.getBearing()+90-
 	         30*movementDirection);
 	      
-	     // If the bot has small energy drop,
-	    // assume it fired
+	     // If the bot has small energy drop, it most likely fired
 	    double changeInEnergy =
 	      previousEnergy-e.getEnergy();
 	    if (changeInEnergy>0 &&
@@ -44,10 +43,6 @@ public class IK_Bot extends AdvancedRobot {
 	          -movementDirection;
 	         setAhead((e.getDistance()/4+25)*movementDirection);
 	     }
-	    // When a bot is spotted,
-	    // sweep the gun and radar
-	    //gunDirection = -gunDirection;
-	    //setTurnGunRight(99999*gunDirection);
 	    
 	    // Fire directly at target
 	    fire ( 2 ) ;
