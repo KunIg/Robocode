@@ -4,16 +4,22 @@ import java.awt.geom.Point2D;
 
 import robocode.AdvancedRobot;
 import robocode.HitRobotEvent;
+import robocode.HitWallEvent;
 import robocode.Rules;
 import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
 
 public class IK_Bot extends AdvancedRobot {
+    final double quarterTurn = 90.0;
+    final double halfTurn = 180.0;
+    final double threeQuarterTurn = 270.0;
+    final double fullTurn = 360.0;
 	  double previousEnergy = 100;
 	  int movementDirection = 1;
 	  int gunDirection = 1;
 	  double oldEnemyHeading;
 	  double buffer;
+	  
 	  public void run() {
 	  double width = this.getBattleFieldWidth();
 	  double height = this.getBattleFieldHeight();
@@ -24,6 +30,7 @@ public class IK_Bot extends AdvancedRobot {
 	    		setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
 	    		setTurnGunRightRadians(Double.POSITIVE_INFINITY);
 	    	}
+	    	
 	    	execute();
 	    } while (true);
 	  }
@@ -49,14 +56,16 @@ public class IK_Bot extends AdvancedRobot {
 	    
 	    
 	    // Fire directly at target
-	    if (e.getDistance()<2*buffer) firelineary ( e );
+	    firelineary (e,3);
 	    
 	    // Track the energy level
 	    previousEnergy = e.getEnergy();
 	  }
 	  
 		public void onHitRobot(HitRobotEvent e) {
-
+		    double angleToEnemy = getHeadingRadians() + e.getBearingRadians();
+			double gunTurn = Utils.normalRelativeAngle(angleToEnemy - getGunHeadingRadians());
+			setTurnGunRightRadians(gunTurn);
 			turnRight(e.getBearing());
 
 			// Determine a shot that won't kill the robot...
@@ -76,8 +85,8 @@ public class IK_Bot extends AdvancedRobot {
 		}
 		
 		
-		public void firelineary(ScannedRobotEvent e) {
-			double bulletPower = 3.0;
+		public void firelineary(ScannedRobotEvent e, double Power) {
+			double bulletPower = Power;
 			double myX = this.getX();
 			double myY = this.getY();
 			double absoluteBearing = e.getBearingRadians() + this.getHeadingRadians();
@@ -104,6 +113,29 @@ public class IK_Bot extends AdvancedRobot {
 			
 		}
 		
+        public void onHitWall(HitWallEvent ev) {
+            centerRobot();
+
+        }
+        private void centerRobot() {
+            double width, height, x, y;
+            height= this.getBattleFieldHeight();
+            width = this.getBattleFieldWidth();
+            y = this.getY();
+             x = this.getX();
+             if (x > width/2)
+                turnRight(threeQuarterTurn - getHeading());
+             else
+                 turnRight(quarterTurn - getHeading());
+             ahead(Math.abs(width/2 - x));
+         	   if (y < height/2)
+                turnLeft(getHeading());
+             else
+                turnRight(halfTurn - getHeading());
+             ahead(Math.abs(height/2 - y));
+
+          }
+        
 		
 		
 
