@@ -31,46 +31,6 @@ public class IK_Bot extends AdvancedRobot {
 	    		setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
 	    		setTurnGunRightRadians(Double.POSITIVE_INFINITY);
 	    	}
-	    	/*
-	    	double xPos = this.getX();
-	    	double yPos = this.getY();
-	    	if (yPos < buffer) { // bottom
-	    		if (this.getHeading()<180) {
-	    			this.setTurnLeft(90);
-	    		}
-	    		else {
-	    			this.setTurnRight(90);
-	    		}
-	    	}
-	    	else if (yPos> height-buffer) {
-	    		if((this.getHeading()<90)&&(this.getHeading()>0)) {
-	    			this.setTurnRight(90);
-	    		}
-	    		else if ((this.getHeading()<360)&&(this.getHeading()>270)) {
-	    			this.setTurnLeft(90);
-	    		}
-	    	}
-	    	if (xPos < buffer) { // left
-	    		if (this.getHeading()<270) {
-	    			this.setTurnLeft(90);
-	    		}
-	    		else {
-	    			this.setTurnRight(90);
-	    		}
-	    	}
-	    	else if (xPos> width-buffer) { // right
-	    		if((this.getHeading()<90)&&(this.getHeading()>0)) {
-	    			this.setTurnLeft(90);
-	    		}
-	    		else if ((this.getHeading()<180)&&(this.getHeading()>90)) {
-	    			this.setTurnRight(90);
-	    		}
-	    	}
-	    	else {
-	    		this.setTurnLeft(0);
-	    		this.setTurnRight(0);
-	    	}
-*/
 	    	execute();
 	    } while (true);
 	  }
@@ -79,7 +39,8 @@ public class IK_Bot extends AdvancedRobot {
 	      double angleToEnemy = getHeadingRadians() + e.getBearingRadians();
 		  double radarTurn = Utils.normalRelativeAngle(angleToEnemy - getRadarHeadingRadians());
 		  //double gunTurn = Utils.normalRelativeAngle(angleToEnemy - getGunHeadingRadians());
-		  double extraTurn = Math.min(Math.atan(36.0/e.getDistance()), Rules.RADAR_TURN_RATE_RADIANS);
+		  double coneWidth = 26.0;
+		  double extraTurn = Math.min(Math.atan(coneWidth/e.getDistance()), Rules.RADAR_TURN_RATE_RADIANS); // 45 degrees/turn per default
 		  radarTurn += (radarTurn < 0 ? -extraTurn : extraTurn);
 
 
@@ -98,55 +59,11 @@ public class IK_Bot extends AdvancedRobot {
 
 	    // Fire directly at target
 	    firelineary (e,3);
-	    //smartFire(e);
 	    
 	    // Track the energy level
 	    previousEnergy = e.getEnergy();
 	  }
-/*
-		public void onHitRobot(HitRobotEvent e) {
-		    double angleToEnemy = getHeadingRadians() + e.getBearingRadians();
-			double gunTurn = Utils.normalRelativeAngle(angleToEnemy - getGunHeadingRadians());
-			setTurnGunRightRadians(gunTurn);
-			turnRight(e.getBearing());
 
-			// Determine a shot that won't kill the robot...
-			// We want to ram him instead for bonus points
-			if (e.getEnergy() > 16) {
-				fire(3);
-			} else if (e.getEnergy() > 10) {
-				fire(2);
-			} else if (e.getEnergy() > 4) {
-				fire(1);
-			} else if (e.getEnergy() > 2) {
-				fire(.5);
-			} else if (e.getEnergy() > .4) {
-				fire(.1);
-			}
-			if (e.getEnergy() <= .6)
-			ahead(40); // Ram him again!
-		}
-*/
-	  /*
-	   public void onHitByBullet(HitByBulletEvent event) {
-	       if (!event.getName().equals(EnemyRobot)) {
-	           double tpRnd = Math.random() * 10;
-	           int rndInt = (int) Math.ceil(tpRnd);
-	           tpRnd = tpRnd % 3;
-	           switch (rndInt) {
-	             case 0:  back(100);
-	                      break;
-	             case 1:  back(10);
-	                      turnRight(90);
-	                      ahead(50);
-	                      break;
-	             case 2: back(10);
-	                     turnLeft(90);
-	                     ahead(50);
-	           }
-	       }
-	   }
-	   */
 	   
 		public void firelineary(ScannedRobotEvent e, double Power) {
 			double bulletPower = Power;
@@ -163,7 +80,9 @@ public class IK_Bot extends AdvancedRobot {
 			double deltaTime = 0;
 			double predictedX = enemyX;
 			double predictedY = enemyY;
-			
+			// Use formula for bullet velocity and wait for intercept e.g.
+			// the time it takes for a fired bullet to travel the distance to
+			// predicted enemy position
 			while (((++deltaTime)*(20-3.0*bulletPower))<Point2D.Double.distance(myX,myY,predictedX,predictedY)) {
 				predictedX += Math.sin(enemyHeading)*enemyVelocity;
 				predictedY += Math.cos(enemyHeading)*enemyVelocity;
@@ -196,8 +115,6 @@ public class IK_Bot extends AdvancedRobot {
              else
                 turnRight(halfTurn - getHeading());
          	  ahead(getRandomNumber((int)Math.abs(height/2 - y)/2,(int)Math.abs(height/2 - y)));
-           	
-
           }
         
         public int getRandomNumber(int min, int max) {
