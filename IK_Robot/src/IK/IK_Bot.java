@@ -61,7 +61,7 @@ public class IK_Bot extends AdvancedRobot {
 	    // Track the energy level
 	    previousEnergy = e.getEnergy();
 	  }
-	  
+	  /*
 		public void onHitRobot(HitRobotEvent e) {
 		    double angleToEnemy = getHeadingRadians() + e.getBearingRadians();
 			double gunTurn = Utils.normalRelativeAngle(angleToEnemy - getGunHeadingRadians());
@@ -81,8 +81,9 @@ public class IK_Bot extends AdvancedRobot {
 			} else if (e.getEnergy() > .4) {
 				fire(.1);
 			}
+			if (e.getEnergy() < 1.5*this.getEnergy())
 			ahead(40); // Ram him again!
-		}
+		}*/
 		
 		
 		public void firelineary(ScannedRobotEvent e, double Power) {
@@ -135,10 +136,6 @@ public class IK_Bot extends AdvancedRobot {
              ahead(Math.abs(height/2 - y));
 
           }
-        
-		
-		
-
 }
 
 
