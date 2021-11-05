@@ -21,6 +21,7 @@ public class IK_Bot extends AdvancedRobot {
 	  double oldEnemyHeading;
 	  double buffer;
 	  String EnemyRobot;
+	  
 	  public void run() {
 	  double width = this.getBattleFieldWidth();
 	  double height = this.getBattleFieldHeight();
@@ -30,6 +31,45 @@ public class IK_Bot extends AdvancedRobot {
 	    	if (getRadarTurnRemaining()== 0.0) {
 	    		setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
 	    		setTurnGunRightRadians(Double.POSITIVE_INFINITY);
+	    	}
+	    	
+	    	double xPos = this.getX();
+	    	double yPos = this.getY();
+	    	if (yPos < buffer) { // bottom
+	    		if (this.getHeading()<halfTurn) {
+	    			this.setTurnLeft(quarterTurn);
+	    		}
+	    		else {
+	    			this.setTurnRight(quarterTurn);
+	    		}
+	    	}
+	    	else if (yPos> height-buffer) {
+	    		if((this.getHeading()<quarterTurn)&&(this.getHeading()>0)) {
+	    			this.setTurnRight(quarterTurn);
+	    		}
+	    		else if ((this.getHeading()<fullTurn)&&(this.getHeading()>threeQuarterTurn)) {
+	    			this.setTurnLeft(quarterTurn);
+	    		}
+	    	}
+	    	if (xPos < buffer) { // left
+	    		if (this.getHeading()<threeQuarterTurn) {
+	    			this.setTurnLeft(quarterTurn);
+	    		}
+	    		else {
+	    			this.setTurnRight(quarterTurn);
+	    		}
+	    	}
+	    	else if (xPos> width-buffer) { // right
+	    		if((this.getHeading()<quarterTurn)&&(this.getHeading()>0)) {
+	    			this.setTurnLeft(quarterTurn);
+	    		}
+	    		else if ((this.getHeading()<halfTurn)&&(this.getHeading()>quarterTurn)) {
+	    			this.setTurnRight(quarterTurn);
+	    		}
+	    	}
+	    	else {
+	    		this.setTurnLeft(0);
+	    		this.setTurnRight(0);
 	    	}
 	    	execute();
 	    } while (true);
@@ -67,23 +107,22 @@ public class IK_Bot extends AdvancedRobot {
 	   
 		public void firelineary(ScannedRobotEvent e, double Power) {
 			double bulletPower = Power;
+			double bulletVelocity = (20-3.0*bulletPower);
 			double myX = this.getX();
 			double myY = this.getY();
 			double absoluteBearing = e.getBearingRadians() + this.getHeadingRadians();
-			double enemyX = myX + e.getDistance() * Math.sin(absoluteBearing);
-			double enemyY = myY + e.getDistance() * Math.cos(absoluteBearing);
 			double enemyHeading = e.getHeadingRadians();
 			double enemyHeadingChange = enemyHeading - oldEnemyHeading;
 			oldEnemyHeading = enemyHeading;
 			double enemyVelocity = e.getVelocity();
 			
 			double deltaTime = 0;
-			double predictedX = enemyX;
-			double predictedY = enemyY;
+			double predictedX = myX + e.getDistance() * Math.sin(absoluteBearing);
+			double predictedY = myY + e.getDistance() * Math.cos(absoluteBearing);
 			// Use formula for bullet velocity and wait for intercept e.g.
 			// the time it takes for a fired bullet to travel the distance to
 			// predicted enemy position
-			while (((++deltaTime)*(20-3.0*bulletPower))<Point2D.Double.distance(myX,myY,predictedX,predictedY)) {
+			while (((++deltaTime)*bulletVelocity)<Point2D.Double.distance(myX,myY,predictedX,predictedY)) {
 				predictedX += Math.sin(enemyHeading)*enemyVelocity;
 				predictedY += Math.cos(enemyHeading)*enemyVelocity;
 				enemyHeading += enemyHeadingChange;
@@ -109,12 +148,12 @@ public class IK_Bot extends AdvancedRobot {
                 turnRight(threeQuarterTurn - getHeading());
              else
                  turnRight(quarterTurn - getHeading());
-             ahead(getRandomNumber((int)Math.abs(width/2 - x)/2,(int)Math.abs(width/2 - x)));
+             ahead(getRandomNumber((int)Math.abs(width/2 - x)/4,(int)Math.abs(width/2 - x)/2));
          	   if (y < height/2)
                 turnLeft(getHeading());
              else
                 turnRight(halfTurn - getHeading());
-         	  ahead(getRandomNumber((int)Math.abs(height/2 - y)/2,(int)Math.abs(height/2 - y)));
+         	  ahead(getRandomNumber((int)Math.abs(height/2 - y)/4,(int)Math.abs(height/2 - y)/2));
           }
         
         public int getRandomNumber(int min, int max) {
